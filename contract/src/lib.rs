@@ -1,38 +1,40 @@
 
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{log, near_bindgen};
+use near_sdk::{log, env, near_bindgen};
 
 
 // Define the contract structure
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
-    guess: u64,
     secret_number: u64
 }
 
-// Define the default, which automatically initializes the contract
-impl Default for Contract{
-    fn default() -> Self{
-        Self{
-            secret_number: 25
-        }
-    }
-}
 
 // Implement the contract structure
 #[near_bindgen]
 impl Contract {
-    // Public method - returns the greeting saved, defaulting to DEFAULT_MESSAGE
-    pub fn get_greeting(&self) -> String {
-        return self.message.clone();
+    #[init]
+    pub fn new(secret_number: u64) -> Self {
+        Self { secret_number }
     }
 
-    // Public method - accepts a greeting, such as "howdy", and records it
-    pub fn set_greeting(&mut self, message: String) {
-        // Use env::log to record logs permanently to the blockchain!
-        log!("Saving greeting {}", message);
-        self.message = message;
+    pub fn get_secret_number(&self) -> u64{
+        self.secret_number.clone()
+    }
+
+    pub fn make_guess(&mut self, guess: u64) -> bool {
+        // // Use env::log to record logs permanently to the blockchain!
+        // log!("Saving guess {}", guess);
+        if self.secret_number == guess{
+            env::log_str("You got the right guess");
+            true
+        }
+        else {
+            env::log_str("Wrong guess");
+            false
+        }
+        
     }
 }
 
@@ -44,23 +46,23 @@ impl Contract {
 mod tests {
     use super::*;
 
-    #[test]
-    fn get_default_greeting() {
-        let contract = Contract::default();
-        // this test did not call set_greeting so should return the default "Hello" greeting
-        assert_eq!(
-            contract.get_greeting(),
-            "Hello".to_string()
-        );
-    }
+    // #[test]
+    // fn get_default_greeting() {
+    //     let contract = Contract::default();
+    //     // this test did not call set_greeting so should return the default "Hello" greeting
+    //     assert_eq!(
+    //         contract.get_greeting(),
+    //         "Hello".to_string()
+    //     );
+    // }
 
-    #[test]
-    fn set_then_get_greeting() {
-        let mut contract = Contract::default();
-        contract.set_greeting("howdy".to_string());
-        assert_eq!(
-            contract.get_greeting(),
-            "howdy".to_string()
-        );
-    }
+    // #[test]
+    // fn set_then_get_greeting() {
+    //     let mut contract = Contract::default();
+    //     contract.set_greeting("howdy".to_string());
+    //     assert_eq!(
+    //         contract.get_greeting(),
+    //         "howdy".to_string()
+    //     );
+    // }
 }
